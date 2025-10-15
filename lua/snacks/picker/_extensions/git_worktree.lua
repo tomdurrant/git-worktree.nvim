@@ -150,10 +150,8 @@ local function get_worktrees()
             display_path = "..." .. string.sub(display_path, -37)
         end
         
-        entry.text = string.format("%-*s %-*s %s", 
-            math.max(widths.branch, 15), entry.branch or "",
-            10, entry.sha or "",
-            display_path)
+        local format_string = "%-" .. tostring(math.max(widths.branch, 15)) .. "s %-10s %s"
+        entry.text = string.format(format_string, entry.branch or "", entry.sha or "", display_path)
     end
 
     return results, nil
