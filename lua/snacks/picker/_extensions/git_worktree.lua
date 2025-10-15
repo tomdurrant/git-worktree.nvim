@@ -61,19 +61,20 @@ local function ask_to_confirm_deletion(forcing)
 end
 
 -- Check if deletion should be confirmed
----@param forcing boolean
+---@param forcing? boolean
 ---@return boolean
 local function confirm_deletion(forcing)
-    if not git_worktree._config.confirm_telescope_deletions then
+    -- Use the same config as telescope extension
+    if not git_worktree._config or not git_worktree._config.confirm_telescope_deletions then
         return true
     end
 
-    local confirmed = ask_to_confirm_deletion(forcing)
+    local confirmed = ask_to_confirm_deletion(forcing or false)
     if string.sub(string.lower(confirmed), 1, 1) == "y" then
         return true
     end
 
-    print("Didn't delete worktree")
+    vim.notify("Didn't delete worktree", vim.log.levels.INFO)
     return false
 end
 
@@ -96,9 +97,21 @@ local function delete_worktree(picker, item)
 end
 
 -- Get git worktree list and parse it
----@return GitWorktreeItem[]
+---@return GitWorktreeItem[]?, string? -- returns nil and error message on failure
 local function get_worktrees()
+    -- Check if we're in a git repository
+    local git_check = vim.fn.system("git rev-parse --git-dir 2>/dev/null")
+    if vim.v.shell_error ~= 0 then
+        return nil, "Not in a git repository"
+    end
+
     local output = vim.fn.systemlist({"git", "worktree", "list"})
+    
+    -- Check if git command failed
+    if vim.v.shell_error ~= 0 then
+        return nil, "Failed to get git worktree list"
+    end
+
     local results = {}
     local widths = {
         path = 0,
@@ -143,7 +156,7 @@ local function get_worktrees()
             display_path)
     end
 
-    return results
+    return results, nil
 end
 
 -- Create input prompt for new worktree path
@@ -158,9 +171,14 @@ end
 function M.git_worktrees(opts)
     opts = opts or {}
     
-    local worktrees = get_worktrees()
+    local worktrees, err = get_worktrees()
     
-    if #worktrees == 0 then
+    if err then
+        vim.notify("Error: " .. err, vim.log.levels.ERROR)
+        return
+    end
+    
+    if not worktrees or #worktrees == 0 then
         vim.notify("No worktrees found", vim.log.levels.INFO)
         return
     end
@@ -242,8 +260,22 @@ function M.create_git_worktree(opts)
         return
     end
 
+    -- Check if we're in a git repository
+    local git_check = vim.fn.system("git rev-parse --git-dir 2>/dev/null")
+    if vim.v.shell_error ~= 0 then
+        vim.notify("Error: Not in a git repository", vim.log.levels.ERROR)
+        return
+    end
+
     -- Get git branches
     local branches_output = vim.fn.systemlist({"git", "branch", "-a"})
+    
+    -- Check if git command failed
+    if vim.v.shell_error ~= 0 then
+        vim.notify("Error: Failed to get git branches", vim.log.levels.ERROR)
+        return
+    end
+    
     local branches = {}
     
     for _, line in ipairs(branches_output) do

@@ -174,6 +174,28 @@ No setup is required! The extension is available immediately when snacks.nvim is
 
 Similar to Telescope, this will first show a picker to select a git branch, then prompt for the worktree path.
 
+### Key mappings for Snacks picker
+
+The Snacks picker extension supports the same key mappings as the Telescope extension:
+
+- `<Enter>` - Switch to the selected worktree
+- `<c-d>` - Delete the selected worktree (with confirmation if enabled)
+- `<c-f>` - Toggle forced deletion for the next delete operation
+
+### Example configuration
+
+You can easily set up keybindings for the Snacks picker:
+
+```lua
+vim.keymap.set('n', '<leader>gw', function()
+  require('snacks.picker._extensions').git_worktrees()
+end, { desc = 'Git worktrees' })
+
+vim.keymap.set('n', '<leader>gW', function()
+  require('snacks.picker._extensions').create_git_worktree()
+end, { desc = 'Create git worktree' })
+```
+
 ## Hooks<a name="hooks"></a>
 
 Yes!  The best part about `git-worktree` is that it emits information so that you
