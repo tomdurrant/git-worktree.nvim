@@ -15,6 +15,7 @@ fix that).
   - [Options](#options)
   - [Usage](#usage)
   - [Telescope](#telescope)
+  - [Snacks.nvim Picker](#snacks)
   - [Hooks](#hooks)
   - [Made with fury](#made-with-fury)
 
@@ -28,6 +29,7 @@ There are a few known issues.  I'll try to be actively filing them in the issues
 Requires NeoVim 0.5+
 Requires plenary.nvim
 Optional telescope.nvim for telescope extension
+Optional snacks.nvim for snacks picker extension
 
 ## Getting Started<a name="getting-started"></a>
 
@@ -146,6 +148,53 @@ First a telescope git branch window will appear. Pressing enter will choose the 
 After the git branch window, a prompt will be presented to enter the path name to write the worktree to.
 
 As of now you can not specify the upstream in the telescope create workflow, however if it finds a branch of the same name in the origin it will use it
+
+## Snacks.nvim Picker<a name="snacks"></a>
+
+As an alternative to Telescope, you can use the [snacks.nvim](https://github.com/folke/snacks.nvim) picker extension:
+
+### Setup
+
+No setup is required! The extension is available immediately when snacks.nvim is installed.
+
+### Switch and Delete worktrees
+
+```lua
+:lua require('snacks.picker._extensions').git_worktrees()
+-- <Enter> - switches to that worktree
+-- <c-d> - deletes that worktree
+-- <c-f> - toggles forcing of the next deletion
+```
+
+### Create a worktree
+
+```lua
+:lua require('snacks.picker._extensions').create_git_worktree()
+```
+
+Similar to Telescope, this will first show a picker to select a git branch, then prompt for the worktree path.
+
+### Key mappings for Snacks picker
+
+The Snacks picker extension supports the same key mappings as the Telescope extension:
+
+- `<Enter>` - Switch to the selected worktree
+- `<c-d>` - Delete the selected worktree (with confirmation if enabled)
+- `<c-f>` - Toggle forced deletion for the next delete operation
+
+### Example configuration
+
+You can easily set up keybindings for the Snacks picker:
+
+```lua
+vim.keymap.set('n', '<leader>gw', function()
+  require('snacks.picker._extensions').git_worktrees()
+end, { desc = 'Git worktrees' })
+
+vim.keymap.set('n', '<leader>gW', function()
+  require('snacks.picker._extensions').create_git_worktree()
+end, { desc = 'Create git worktree' })
+```
 
 ## Hooks<a name="hooks"></a>
 
